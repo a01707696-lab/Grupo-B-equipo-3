@@ -9,7 +9,9 @@ Instrucciones:
 4. Establecer en qué fase se encuentra la tarea 
 
 Funcionalidades implementadas:
-
+1. Añadir etiquetas
+2. Organizar tareas
+3. Asignación y modificación de roles
 
 Integrantes:
 Mónica Berenice Paulín López | A01707696  

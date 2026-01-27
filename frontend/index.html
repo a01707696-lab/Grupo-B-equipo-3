@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestor de Tareas</title>
+</head>
+<body>
+    <h1>Gestor de Tareas</h1>
+    <p>Frontend funcionando correctamente</p>
+
+    <button onclick="probarBackend()">Probar conexión con backend</button>
+
+    <p id="respuesta"></p>
+
+    <script>
+        function probarBackend() {
+            fetch("http://127.0.0.1:5000/health")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("respuesta").innerText = data.message;
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 Desarrollo de un Gestor de Tareas con metodología Scrum
 
-El proyecto tiene como objetivo desarrollar una aplicación Web sencilla para gestionar tareas, aplicar reglas de negocio realistas y realizar trabajos siguiendo la metodología de Scrum.
+## Descripción
+El proyecto tiene como objetivo desarrollar una aplicación Web sencilla para gestionar tareas, aplicar reglas de negocio realistas y realizar trabajos siguiendo la metodología de Scrum. Las tareas se almacenan en una estructura de datos en el backend la cual permanece activa mientras el servidor esté en ejecución. En este sprint se implementa la persistencia en memoria para validar la lógica del backend antes de integrar una base de datos en sprints posteriores.
 
 Instrucciones:
 1. Definir o crear tarea
@@ -12,6 +13,14 @@ Funcionalidades implementadas:
 1. Añadir etiquetas
 2. Organizar tareas
 3. Asignación y modificación de roles
+
+## Persistencia básica de datos
+1. Al iniciar el backend se crea una lista de tareas en memoria
+2. Las peticiones GET devuelven el contenido actual de dicha lista
+3. Las peticiones POST añaden nuevas tareas a la lista
+4. Al reiniciar el sistema las tareas se pierden
+
+Esto permite simplificar el desarrollo inicial, centrarse en la base del sistema y la comunicación frontend-backend.
 
 Integrantes:
 Mónica Berenice Paulín López | A01707696  

@@ -20,7 +20,7 @@ Funcionalidades implementadas:
 3. Las peticiones POST añaden nuevas tareas a la lista
 4. Al reiniciar el sistema las tareas se pierden
 
-Esto permite simplificar el desarrollo inicial, centrarse en la base del sistema y la comunicación frontend-backend.
+Esto permite simplificar el desarrollo inicial, centrarse en la base del sistema y en la comunicación frontend-backend.
 
 Integrantes:
 Mónica Berenice Paulín López | A01707696  

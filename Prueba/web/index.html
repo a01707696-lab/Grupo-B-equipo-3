@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Tablero Kanban</title>
 
   <style>
@@ -18,7 +18,7 @@
     .column {
       flex: 1;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 6px;
       padding: 10px;
     }
 
@@ -45,26 +45,30 @@
 <h1>📋 Tablero Kanban</h1>
 
 <form id="task-form">
-  <input type="text" id="task-title" placeholder="Título de la tarea" />
-  <input type="number" id="task-duration" placeholder="Duración (min)" />
+  <input type="text" id="task-title" placeholder="Título de la tarea">
+  <input type="number" id="task-duration" placeholder="Duración (min)">
   <button type="submit">Crear tarea</button>
 </form>
 
 <br>
 
+<button onclick="saveLocal()">💾 Guardar en este ordenador</button>
+
+<br><br>
+
 <div class="board">
   <div class="column" id="backlog">
-    <h2>Backlog</h2>
+    <h2>Backlog (<span id="time-backlog">0</span> min)</h2>
     <div class="tasks"></div>
   </div>
 
   <div class="column" id="doing">
-    <h2>Doing</h2>
+    <h2>Doing (<span id="time-doing">0</span> min)</h2>
     <div class="tasks"></div>
   </div>
 
   <div class="column" id="done">
-    <h2>Done</h2>
+    <h2>Done (<span id="time-done">0</span> min)</h2>
     <div class="tasks"></div>
   </div>
 </div>
@@ -81,19 +85,29 @@
   function render(tasks) {
     document.querySelectorAll(".tasks").forEach(col => col.innerHTML = "");
 
+    let totals = { backlog: 0, doing: 0, done: 0 };
+
     tasks.forEach(task => {
+      const duration = task.duration ?? 0;
+      totals[task.status] += duration;
+
       const div = document.createElement("div");
       div.className = "task";
       div.innerHTML = `
         <strong>${task.title}</strong><br>
-        ⏱️ ${task.duration} min<br>
+        ⏱️ ${duration} min<br>
         <button onclick="moveTask(${task.id}, 'backlog')">Backlog</button>
         <button onclick="moveTask(${task.id}, 'doing')">Doing</button>
         <button onclick="moveTask(${task.id}, 'done')">Done</button>
         <button onclick="deleteTask(${task.id})">🗑️</button>
       `;
+
       document.querySelector(`#${task.status} .tasks`).appendChild(div);
     });
+
+    document.getElementById("time-backlog").textContent = totals.backlog;
+    document.getElementById("time-doing").textContent = totals.doing;
+    document.getElementById("time-done").textContent = totals.done;
   }
 
   async function moveTask(id, status) {
@@ -132,6 +146,23 @@
     loadTasks();
   });
 
+  function saveLocal() {
+    fetch(`${API}/tasks`)
+      .then(res => res.json())
+      .then(tasks => {
+        localStorage.setItem("kanbanTasks", JSON.stringify(tasks));
+        alert("Tareas guardadas en este ordenador 💾");
+      });
+  }
+
+  function loadFromLocal() {
+    const local = localStorage.getItem("kanbanTasks");
+    if (local) {
+      render(JSON.parse(local));
+    }
+  }
+
+  loadFromLocal();
   loadTasks();
 </script>
 

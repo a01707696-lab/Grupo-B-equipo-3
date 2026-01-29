@@ -1,77 +1,76 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
+import json
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# --------------------
-# Persistencia en memoria
-# --------------------
-tasks = []
-next_id = 1
+FILE = "tasks.json"
 
-# --------------------
-# Endpoint de prueba
-# --------------------
-@app.route("/")
+
+# ---------- Persistencia ----------
+def load_tasks():
+    if not os.path.exists(FILE):
+        return []
+    with open(FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_tasks(tasks):
+    with open(FILE, "w", encoding="utf-8") as f:
+        json.dump(tasks, f, indent=2)
+
+
+# ---------- Endpoints ----------
+@app.route("/", methods=["GET"])
 def home():
-    return jsonify({"message": "Backend funcionando correctamente"})
+    return {"message": "Backend funcionando correctamente"}
 
-# --------------------
-# GET /tasks → listar tareas
-# --------------------
+
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
-    return jsonify(tasks)
+    return jsonify(load_tasks())
 
-# --------------------
-# POST /tasks → crear tarea
-# --------------------
+
 @app.route("/tasks", methods=["POST"])
 def create_task():
-    global next_id
-    data = request.get_json()
+    tasks = load_tasks()
+    data = request.json
 
-    if not data or "title" not in data or data["title"].strip() == "":
-        return jsonify({"error": "El título es obligatorio"}), 400
+    if not data.get("title"):
+        return {"error": "El título es obligatorio"}, 400
 
     new_task = {
-        "id": next_id,
+        "id": len(tasks) + 1,
         "title": data["title"],
-        "status": "backlog"
+        "status": "backlog",
+        "duration": int(data.get("duration", 0))
     }
 
     tasks.append(new_task)
-    next_id += 1
+    save_tasks(tasks)
 
     return jsonify(new_task), 201
 
-# --------------------
-# PUT /tasks/<id> → cambiar estado
-# --------------------
+
 @app.route("/tasks/<int:task_id>", methods=["PUT"])
 def update_task(task_id):
-    data = request.get_json()
+    tasks = load_tasks()
+    data = request.json
 
     for task in tasks:
         if task["id"] == task_id:
             task["status"] = data.get("status", task["status"])
+            task["duration"] = int(data.get("duration", task["duration"]))
+            save_tasks(tasks)
             return jsonify(task)
 
-    return jsonify({"error": "Tarea no encontrada"}), 404
+    return {"error": "Tarea no encontrada"}, 404
 
-# --------------------
-# DELETE /tasks/<id> → eliminar tarea
-# --------------------
+
 @app.route("/tasks/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
-    global tasks
-    tasks = [t for t in tasks if t["id"] != task_id]
-    return jsonify({"message": "Tarea eliminada"})
-
-# --------------------
-# Arranque
-# --------------------
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=8000)
-
+    tasks = load_tasks()
+    tasks = [task for task in tasks if task["id"] != task_id]
+    save_tasks(tasks)

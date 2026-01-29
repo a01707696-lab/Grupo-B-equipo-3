@@ -74,3 +74,8 @@ def delete_task(task_id):
     tasks = load_tasks()
     tasks = [task for task in tasks if task["id"] != task_id]
     save_tasks(tasks)
+    return {"message": "Tarea eliminada"}
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)

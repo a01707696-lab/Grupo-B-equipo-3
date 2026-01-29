@@ -1,53 +1,58 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 
-app = FastAPI()
+app = Flask(__name__)
+CORS(app)  # 🔑 Permite conexión frontend-backend
 
-# Permitir que el frontend se conecte
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Modelo de datos de una tarea
-class Task(BaseModel):
-    id: int
-    title: str
-    status: str
-
-class TaskCreate(BaseModel):
-    title: str
-
-# Lista de tareas guardadas en memoria
-tasks: List[Task] = [
-    Task(id=1, title="Configurar proyecto", status="backlog"),
-    Task(id=2, title="Crear backend", status="doing"),
-    Task(id=3, title="Conectar frontend", status="done"),
+# --------------------
+# Persistencia en memoria
+# --------------------
+tasks = [
+    {"id": 1, "title": "Primera tarea", "status": "backlog"}
 ]
+next_id = 2
 
+# --------------------
 # Endpoint de prueba
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+# --------------------
+@app.route("/")
+def home():
+    return jsonify({"message": "Backend funcionando correctamente"})
 
-# Listar tareas
-@app.get("/tasks", response_model=List[Task])
-def list_tasks():
-    return tasks
+# --------------------
+# GET /tasks → listar tareas
+# --------------------
+@app.route("/tasks", methods=["GET"])
+def get_tasks():
+    return jsonify(tasks)
 
-# Crear tarea nueva
-@app.post("/tasks", response_model=Task)
-def create_task(task_in: TaskCreate):
-    title = task_in.title.strip()
-    if not title:
-        raise HTTPException(status_code=400, detail="El título no puede estar vacío")
+# --------------------
+# POST /tasks → crear tarea
+# --------------------
+@app.route("/tasks", methods=["POST"])
+def create_task():
+    global next_id
 
-    new_id = max([t.id for t in tasks] or [0]) + 1
-    task = Task(id=new_id, title=title, status="backlog")
-    tasks.append(task)
-    return task
+    data = request.get_json()
+
+    # Validación básica
+    if not data or "title" not in data or data["title"].strip() == "":
+        return jsonify({"error": "El título es obligatorio"}), 400
+
+    new_task = {
+        "id": next_id,
+        "title": data["title"],
+        "status": "backlog"
+    }
+
+    tasks.append(new_task)
+    next_id += 1
+
+    return jsonify(new_task), 201
+
+
+# --------------------
+# Arranque del servidor
+# --------------------
+if __name__ == "__main__":
+    app.run(debug=True, port=8000)

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -10,7 +10,7 @@ tasks = [
 
 @app.route("/")
 def home():
-    return "Backend Flask funcionando 🚀"
+    return render_template("index.html")
 
 @app.route("/tasks")
 def get_tasks():
@@ -18,5 +18,3 @@ def get_tasks():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-

@@ -7,33 +7,14 @@
 <body>
 
     <h1>Gestor de Tareas</h1>
-    <p>Frontend funcionando correctamente</p>
 
-    <button onclick="probarBackend()">Probar conexión con backend</button>
-    <p id="respuesta"></p>
-
-    <hr>
-
-    <h2>Listado de tareas</h2>
     <button onclick="cargarTareas()">Cargar tareas</button>
 
     <ul id="lista-tareas"></ul>
 
     <script>
-        function probarBackend() {
-            fetch("http://127.0.0.1:5000/")
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById("respuesta").innerText = data;
-                })
-                .catch(error => {
-                    document.getElementById("respuesta").innerText = "Error al conectar";
-                    console.error(error);
-                });
-        }
-
         function cargarTareas() {
-            fetch("http://127.0.0.1:5000/tasks")
+            fetch("/tasks")
                 .then(response => response.json())
                 .then(data => {
                     const lista = document.getElementById("lista-tareas");
@@ -44,9 +25,6 @@
                         li.innerText = tarea.title + " (" + tarea.status + ")";
                         lista.appendChild(li);
                     });
-                })
-                .catch(error => {
-                    console.error(error);
                 });
         }
     </script>

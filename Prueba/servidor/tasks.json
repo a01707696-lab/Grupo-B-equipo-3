@@ -3,42 +3,12 @@
     "id": 1,
     "title": "tarea 1",
     "status": "doing",
-    "duration": 2
+    "duration": 0
   },
   {
     "id": 2,
     "title": "tarea 2",
-    "status": "doing",
-    "duration": 30
-  },
-  {
-    "id": 3,
-    "title": "tarea 3",
-    "status": "doing",
-    "duration": 20
-  },
-  {
-    "id": 4,
-    "title": "tarea 4",
-    "status": "doing",
-    "duration": 3
-  },
-  {
-    "id": 5,
-    "title": "tarea 5",
-    "status": "doing",
-    "duration": 25
-  },
-  {
-    "id": 6,
-    "title": "tarea 6",
-    "status": "doing",
-    "duration": 15
-  },
-  {
-    "id": 7,
-    "title": "tarea 7",
-    "status": "doing",
-    "duration": 6
+    "status": "backlog",
+    "duration": 0
   }
 ]

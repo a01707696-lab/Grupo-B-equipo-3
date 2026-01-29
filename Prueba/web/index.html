@@ -3,136 +3,541 @@
 <head>
   <meta charset="UTF-8">
   <title>Tablero Kanban</title>
-
   <style>
-    body { font-family: Arial; margin: 20px; }
-    .board { display: flex; gap: 20px; }
-    .column { flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 10px; }
-    .task { background: #f2f2f2; padding: 8px; margin-bottom: 8px; border-radius: 4px; }
-    button { font-size: 12px; margin: 2px; }
-    input { margin: 3px 0; width: 90%; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      background: #667eea;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    
+    .main-content {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .sidebar {
+      width: 300px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    
+    .board {
+      flex: 1;
+      display: flex;
+      gap: 15px;
+    }
+    
+    .column {
+      flex: 1;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid #ddd;
+    }
+    
+    .column-header {
+      text-align: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid;
+    }
+    
+    #backlog .column-header { border-color: #6c757d; }
+    #doing .column-header { border-color: #007bff; }
+    #done .column-header { border-color: #28a745; }
+    
+    .task {
+      background: white;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-left: 4px solid #667eea;
+    }
+    
+    .task-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+    
+    .task-title:hover {
+      color: #667eea;
+    }
+    
+    .task-title-edit {
+      width: 100%;
+      padding: 4px;
+      margin-bottom: 5px;
+    }
+    
+    .task-info {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .task-actions {
+      margin-top: 10px;
+    }
+    
+    button {
+      padding: 8px 12px;
+      margin: 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    
+    .btn-primary { background: #007bff; color: white; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-warning { background: #ffc107; color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    
+    .user-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #667eea;
+      color: white;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-top: 5px;
+    }
+    
+    .time-input {
+      width: 60px;
+      padding: 2px;
+      text-align: center;
+    }
   </style>
 </head>
 
 <body>
-
-<h1>📋 Tablero Kanban</h1>
-
-<form id="task-form">
-  <input type="text" id="task-title" placeholder="Título de la tarea">
-  <input type="number" id="task-estimated" placeholder="Tiempo estimado (min)">
-  <button type="submit">Crear tarea</button>
-</form>
-
-<br>
-
-<div class="board">
-
-  <div class="column" id="backlog">
-    <h2>Backlog</h2>
-    <div class="tasks"></div>
+  <div class="container">
+    <h1>📋 Tablero Kanban</h1>
+    
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value" id="total-tasks">0</div>
+        <div>Total Tareas</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="doing-count">0/4</div>
+        <div>En Progreso</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="total-estimated">0</div>
+        <div>Min Estimados</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="total-real">0</div>
+        <div>Min Reales</div>
+      </div>
+    </div>
+    
+    <div class="main-content">
+      <div class="sidebar">
+        <h3>👥 Usuarios</h3>
+        <input type="text" id="user-name" placeholder="Nombre del usuario">
+        <button onclick="addUser()" class="btn-primary">Agregar Usuario</button>
+        
+        <div id="users-list" style="margin-top: 15px;"></div>
+        
+        <hr style="margin: 20px 0;">
+        
+        <h3>➕ Nueva Tarea</h3>
+        <input type="text" id="task-title" placeholder="Título de la tarea">
+        <input type="number" id="task-estimated" placeholder="Tiempo estimado (min)">
+        <select id="task-assign">
+          <option value="">Sin asignar</option>
+        </select>
+        <button onclick="createTask()" class="btn-success">Crear Tarea</button>
+        
+        <div id="message" class="message" style="display: none;"></div>
+      </div>
+      
+      <div class="board">
+        <div class="column" id="backlog">
+          <div class="column-header">
+            <h2>📥 Backlog</h2>
+            <div>Tareas pendientes</div>
+          </div>
+          <div id="backlog-tasks"></div>
+        </div>
+        
+        <div class="column" id="doing">
+          <div class="column-header">
+            <h2>⚡ Doing</h2>
+            <div><span id="doing-tasks-count">0</span>/4 tareas • <span id="doing-total-time">0</span> min</div>
+          </div>
+          <div id="doing-tasks"></div>
+        </div>
+        
+        <div class="column" id="done">
+          <div class="column-header">
+            <h2>✅ Done</h2>
+            <div><span id="done-tasks-count">0</span> tareas • <span id="done-total-time">0</span> min</div>
+          </div>
+          <div id="done-tasks"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="column" id="doing">
-    <h2>Doing (máx 4) – Estimado total: <span id="doing-time">0</span> min</h2>
-    <div class="tasks"></div>
-  </div>
+  <script>
+    const API = "http://127.0.0.1:5000";
+    let users = [];
+    let tasks = [];
+    let editingTaskId = null;
 
-  <div class="column" id="done">
-    <h2>Done – Tiempo real</h2>
-    <div class="tasks"></div>
-  </div>
+    // Cargar datos iniciales
+    async function loadAllData() {
+      await loadUsers();
+      await loadTasks();
+      await loadStats();
+    }
 
-</div>
+    // ========== USUARIOS ==========
+    async function loadUsers() {
+      try {
+        const res = await fetch(`${API}/users`);
+        if (res.ok) {
+          users = await res.json();
+          updateUsersList();
+          updateAssignSelect();
+        }
+      } catch (error) {
+        showMessage("Error cargando usuarios", "error");
+      }
+    }
 
-<script>
-const API = "http://127.0.0.1:5000";
+    async function addUser() {
+      const nameInput = document.getElementById('user-name');
+      const name = nameInput.value.trim();
+      
+      if (!name) {
+        showMessage("El nombre es obligatorio", "error");
+        return;
+      }
 
-async function loadTasks() {
-  const res = await fetch(`${API}/tasks`);
-  const tasks = await res.json();
-  render(tasks);
-}
+      try {
+        const res = await fetch(`${API}/users`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name })
+        });
 
-function render(tasks) {
-  document.querySelectorAll(".tasks").forEach(c => c.innerHTML = "");
-  let doingTotal = 0;
+        if (res.ok) {
+          nameInput.value = '';
+          await loadUsers();
+          showMessage("Usuario agregado", "success");
+        } else {
+          const error = await res.json();
+          showMessage(error.error || "Error al agregar usuario", "error");
+        }
+      } catch (error) {
+        showMessage("Error de conexión", "error");
+      }
+    }
 
-  tasks.forEach(task => {
-    if (task.status === "doing") doingTotal += task.estimated;
+    function updateUsersList() {
+      const container = document.getElementById('users-list');
+      if (users.length === 0) {
+        container.innerHTML = '<p style="color: #666;">No hay usuarios aún</p>';
+      } else {
+        container.innerHTML = users.map(user => `
+          <div style="background: white; padding: 8px; margin-bottom: 5px; border-radius: 4px;">
+            👤 <strong>${user.name}</strong>
+          </div>
+        `).join('');
+      }
+    }
 
-    const div = document.createElement("div");
-    div.className = "task";
+    function updateAssignSelect() {
+      const select = document.getElementById('task-assign');
+      select.innerHTML = '<option value="">Sin asignar</option>' +
+        users.map(user => `<option value="${user.id}">${user.name}</option>`).join('');
+    }
 
-    if (task.status === "done") {
-      div.innerHTML = `
-        <strong>${task.title}</strong><br>
-        Estimado: ${task.estimated} min<br>
-        Real:
-        <input type="number" value="${task.real}"
-          onchange="setReal(${task.id}, this.value)">
-      `;
-    } else {
-      div.innerHTML = `
-        <strong>${task.title}</strong><br>
-        Estimado: ${task.estimated} min<br>
-        <button onclick="moveTask(${task.id}, 'backlog')">Backlog</button>
-        <button onclick="moveTask(${task.id}, 'doing')">Doing</button>
-        <button onclick="moveTask(${task.id}, 'done')">Done</button>
+    function getUserById(id) {
+      return users.find(u => u.id == id);
+    }
+
+    // ========== TAREAS ==========
+    async function loadTasks() {
+      try {
+        const res = await fetch(`${API}/tasks`);
+        if (res.ok) {
+          tasks = await res.json();
+          renderTasks();
+        }
+      } catch (error) {
+        console.error("Error cargando tareas:", error);
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API}/stats`);
+        if (res.ok) {
+          const stats = await res.json();
+          updateStats(stats);
+        }
+      } catch (error) {
+        console.error("Error cargando estadísticas:", error);
+      }
+    }
+
+    function updateStats(stats) {
+      document.getElementById('total-tasks').textContent = stats.total_tasks || 0;
+      document.getElementById('doing-count').textContent = `${stats.doing_count || 0}/4`;
+      document.getElementById('total-estimated').textContent = stats.doing_estimated || 0;
+      document.getElementById('total-real').textContent = stats.done_real || 0;
+      
+      document.getElementById('doing-tasks-count').textContent = stats.doing_count || 0;
+      document.getElementById('doing-total-time').textContent = stats.doing_estimated || 0;
+      document.getElementById('done-tasks-count').textContent = stats.done_count || 0;
+      document.getElementById('done-total-time').textContent = stats.done_real || 0;
+    }
+
+    function renderTasks() {
+      renderColumn('backlog', tasks.filter(t => t.status === 'backlog'));
+      renderColumn('doing', tasks.filter(t => t.status === 'doing'));
+      renderColumn('done', tasks.filter(t => t.status === 'done'));
+    }
+
+    function renderColumn(columnId, columnTasks) {
+      const container = document.getElementById(`${columnId}-tasks`);
+      if (columnTasks.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center;">No hay tareas</p>';
+      } else {
+        container.innerHTML = columnTasks.map(task => createTaskHTML(task)).join('');
+      }
+    }
+
+    function createTaskHTML(task) {
+      const user = getUserById(task.assigned_to);
+      const isEditing = editingTaskId === task.id;
+      
+      return `
+        <div class="task" id="task-${task.id}">
+          ${isEditing ? 
+            `<input type="text" class="task-title-edit" value="${task.title}" 
+              onblur="updateTaskTitle(${task.id}, this.value)">` :
+            `<div class="task-title" onclick="startEditTitle(${task.id})">
+              ${task.title}
+            </div>`
+          }
+          
+          <div class="task-info">
+            ID: ${task.id} | Estimado: ${task.estimated || 0} min
+            ${task.real_time ? `| Real: ${task.real_time} min` : ''}
+          </div>
+          
+          ${user ? `<div class="user-badge">👤 ${user.name}</div>` : ''}
+          
+          ${task.status === 'done' ? `
+            <div style="margin-top: 5px;">
+              <small>Tiempo real:</small>
+              <input type="number" class="time-input" value="${task.real_time || 0}" 
+                onchange="updateTask(${task.id}, 'real_time', this.value)"> min
+            </div>
+          ` : ''}
+          
+          <div class="task-actions">
+            <button class="btn-secondary" onclick="moveTask(${task.id}, 'backlog')">Backlog</button>
+            <button class="btn-primary" onclick="moveTask(${task.id}, 'doing')">Doing</button>
+            <button class="btn-success" onclick="moveTask(${task.id}, 'done')">Done</button>
+            <button class="btn-danger" onclick="deleteTask(${task.id})">Eliminar</button>
+          </div>
+          
+          <div style="font-size: 0.8em; color: #888; margin-top: 5px;">
+            ${task.created_at || ''}
+          </div>
+        </div>
       `;
     }
 
-    document.querySelector(`#${task.status} .tasks`).appendChild(div);
-  });
+    async function createTask() {
+      const title = document.getElementById('task-title').value.trim();
+      const estimated = parseInt(document.getElementById('task-estimated').value) || 0;
+      const assignedTo = document.getElementById('task-assign').value || null;
 
-  document.getElementById("doing-time").textContent = doingTotal;
-}
+      if (!title) {
+        showMessage("El título es obligatorio", "error");
+        return;
+      }
 
-async function moveTask(id, status) {
-  const res = await fetch(`${API}/tasks/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status })
-  });
+      try {
+        const res = await fetch(`${API}/tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            title: title, 
+            estimated: estimated,
+            assigned_to: assignedTo 
+          })
+        });
 
-  if (!res.ok) {
-    const error = await res.json();
-    alert(error.error);
-    return;
-  }
+        if (res.ok) {
+          // Limpiar formulario
+          document.getElementById('task-title').value = '';
+          document.getElementById('task-estimated').value = '';
+          document.getElementById('task-assign').value = '';
+          
+          // Recargar datos
+          await loadTasks();
+          await loadStats();
+          showMessage("Tarea creada correctamente", "success");
+        } else {
+          const error = await res.json();
+          showMessage(error.error || "Error al crear tarea", "error");
+        }
+      } catch (error) {
+        showMessage("Error de conexión con el servidor", "error");
+      }
+    }
 
-  loadTasks();
-}
+    async function moveTask(id, status) {
+      try {
+        const res = await fetch(`${API}/tasks/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: status })
+        });
 
-async function setReal(id, value) {
-  await fetch(`${API}/tasks/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ real: parseInt(value) || 0 })
-  });
-}
+        if (res.ok) {
+          await loadTasks();
+          await loadStats();
+        } else {
+          const error = await res.json();
+          showMessage(error.error || "No se puede mover la tarea", "error");
+        }
+      } catch (error) {
+        showMessage("Error de conexión", "error");
+      }
+    }
 
-document.getElementById("task-form").addEventListener("submit", async e => {
-  e.preventDefault();
+    async function updateTask(id, field, value) {
+      try {
+        const res = await fetch(`${API}/tasks/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [field]: value })
+        });
 
-  const title = task-title.value.trim();
-  const estimated = parseInt(task-estimated.value) || 0;
+        if (res.ok) {
+          await loadTasks();
+          await loadStats();
+        }
+      } catch (error) {
+        console.error("Error actualizando tarea:", error);
+      }
+    }
 
-  if (!title) return alert("Título obligatorio");
+    async function startEditTitle(id) {
+      editingTaskId = id;
+      await loadTasks();
+      const input = document.querySelector(`#task-${id} .task-title-edit`);
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
 
-  await fetch(`${API}/tasks`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title, estimated })
-  });
+    async function updateTaskTitle(id, newTitle) {
+      if (newTitle.trim()) {
+        await updateTask(id, 'title', newTitle.trim());
+      }
+      editingTaskId = null;
+      await loadTasks();
+    }
 
-  task-title.value = "";
-  task-estimated.value = "";
-  loadTasks();
-});
+    async function deleteTask(id) {
+      if (!confirm('¿Estás seguro de eliminar esta tarea?')) return;
 
-loadTasks();
-</script>
+      try {
+        const res = await fetch(`${API}/tasks/${id}`, {
+          method: 'DELETE'
+        });
 
+        if (res.ok) {
+          await loadTasks();
+          await loadStats();
+          showMessage("Tarea eliminada", "success");
+        }
+      } catch (error) {
+        showMessage("Error al eliminar tarea", "error");
+      }
+    }
+
+    function showMessage(text, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = 'block';
+      
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    // Inicializar
+    loadAllData();
+  </script>
 </body>
 </html>

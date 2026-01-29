@@ -5,38 +5,12 @@
   <title>Tablero Kanban</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-
-    .board {
-      display: flex;
-      gap: 20px;
-    }
-
-    .column {
-      flex: 1;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 10px;
-    }
-
-    .task {
-      background: #f2f2f2;
-      padding: 8px;
-      margin-bottom: 8px;
-      border-radius: 4px;
-    }
-
-    button {
-      font-size: 12px;
-      margin: 2px;
-    }
-
-    input {
-      margin-right: 5px;
-    }
+    body { font-family: Arial; margin: 20px; }
+    .board { display: flex; gap: 20px; }
+    .column { flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 10px; }
+    .task { background: #f2f2f2; padding: 8px; margin-bottom: 8px; border-radius: 4px; }
+    button { font-size: 12px; margin: 2px; }
+    input { margin: 3px 0; width: 90%; }
   </style>
 </head>
 
@@ -46,124 +20,118 @@
 
 <form id="task-form">
   <input type="text" id="task-title" placeholder="Título de la tarea">
-  <input type="number" id="task-duration" placeholder="Duración (min)">
+  <input type="number" id="task-estimated" placeholder="Tiempo estimado (min)">
   <button type="submit">Crear tarea</button>
 </form>
 
 <br>
 
-<button onclick="saveLocal()">💾 Guardar en este ordenador</button>
-
-<br><br>
-
 <div class="board">
+
   <div class="column" id="backlog">
-    <h2>Backlog (<span id="time-backlog">0</span> min)</h2>
+    <h2>Backlog</h2>
     <div class="tasks"></div>
   </div>
 
   <div class="column" id="doing">
-    <h2>Doing (<span id="time-doing">0</span> min)</h2>
+    <h2>Doing (máx 4) – Estimado total: <span id="doing-time">0</span> min</h2>
     <div class="tasks"></div>
   </div>
 
   <div class="column" id="done">
-    <h2>Done (<span id="time-done">0</span> min)</h2>
+    <h2>Done – Tiempo real</h2>
     <div class="tasks"></div>
   </div>
+
 </div>
 
 <script>
-  const API = "http://127.0.0.1:5000";
+const API = "http://127.0.0.1:5000";
 
-  async function loadTasks() {
-    const res = await fetch(`${API}/tasks`);
-    const tasks = await res.json();
-    render(tasks);
-  }
+async function loadTasks() {
+  const res = await fetch(`${API}/tasks`);
+  const tasks = await res.json();
+  render(tasks);
+}
 
-  function render(tasks) {
-    document.querySelectorAll(".tasks").forEach(col => col.innerHTML = "");
+function render(tasks) {
+  document.querySelectorAll(".tasks").forEach(c => c.innerHTML = "");
+  let doingTotal = 0;
 
-    let totals = { backlog: 0, doing: 0, done: 0 };
+  tasks.forEach(task => {
+    if (task.status === "doing") doingTotal += task.estimated;
 
-    tasks.forEach(task => {
-      const duration = task.duration ?? 0;
-      totals[task.status] += duration;
+    const div = document.createElement("div");
+    div.className = "task";
 
-      const div = document.createElement("div");
-      div.className = "task";
+    if (task.status === "done") {
       div.innerHTML = `
         <strong>${task.title}</strong><br>
-        ⏱️ ${duration} min<br>
+        Estimado: ${task.estimated} min<br>
+        Real:
+        <input type="number" value="${task.real}"
+          onchange="setReal(${task.id}, this.value)">
+      `;
+    } else {
+      div.innerHTML = `
+        <strong>${task.title}</strong><br>
+        Estimado: ${task.estimated} min<br>
         <button onclick="moveTask(${task.id}, 'backlog')">Backlog</button>
         <button onclick="moveTask(${task.id}, 'doing')">Doing</button>
         <button onclick="moveTask(${task.id}, 'done')">Done</button>
-        <button onclick="deleteTask(${task.id})">🗑️</button>
       `;
-
-      document.querySelector(`#${task.status} .tasks`).appendChild(div);
-    });
-
-    document.getElementById("time-backlog").textContent = totals.backlog;
-    document.getElementById("time-doing").textContent = totals.doing;
-    document.getElementById("time-done").textContent = totals.done;
-  }
-
-  async function moveTask(id, status) {
-    await fetch(`${API}/tasks/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status })
-    });
-    loadTasks();
-  }
-
-  async function deleteTask(id) {
-    await fetch(`${API}/tasks/${id}`, { method: "DELETE" });
-    loadTasks();
-  }
-
-  document.getElementById("task-form").addEventListener("submit", async e => {
-    e.preventDefault();
-
-    const title = document.getElementById("task-title").value.trim();
-    const duration = parseInt(document.getElementById("task-duration").value) || 0;
-
-    if (!title) {
-      alert("El título no puede estar vacío");
-      return;
     }
 
-    await fetch(`${API}/tasks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, duration })
-    });
-
-    document.getElementById("task-title").value = "";
-    document.getElementById("task-duration").value = "";
-    loadTasks();
+    document.querySelector(`#${task.status} .tasks`).appendChild(div);
   });
 
-  function saveLocal() {
-    fetch(`${API}/tasks`)
-      .then(res => res.json())
-      .then(tasks => {
-        localStorage.setItem("kanbanTasks", JSON.stringify(tasks));
-        alert("Tareas guardadas en este ordenador 💾");
-      });
+  document.getElementById("doing-time").textContent = doingTotal;
+}
+
+async function moveTask(id, status) {
+  const res = await fetch(`${API}/tasks/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status })
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    alert(error.error);
+    return;
   }
 
-  function loadFromLocal() {
-    const local = localStorage.getItem("kanbanTasks");
-    if (local) {
-      render(JSON.parse(local));
-    }
-  }
-
-  loadFromLocal();
   loadTasks();
+}
+
+async function setReal(id, value) {
+  await fetch(`${API}/tasks/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ real: parseInt(value) || 0 })
+  });
+}
+
+document.getElementById("task-form").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const title = task-title.value.trim();
+  const estimated = parseInt(task-estimated.value) || 0;
+
+  if (!title) return alert("Título obligatorio");
+
+  await fetch(`${API}/tasks`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, estimated })
+  });
+
+  task-title.value = "";
+  task-estimated.value = "";
+  loadTasks();
+});
+
+loadTasks();
 </script>
 
 </body>

@@ -2,15 +2,29 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Kanban Scrumban</title>
+  <title>Gestor de Tareas - Kanban</title>
   <style>
     body { font-family: Arial; margin: 20px; }
     .board { display: flex; gap: 20px; }
-    .column { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
-    .column h2 { text-align: center; }
-    .task { background: #eee; margin: 5px 0; padding: 5px; border-radius: 3px; }
+    .column {
+      flex: 1;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .task {
+      background: #eee;
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 3px;
+    }
+    button {
+      margin: 2px;
+      font-size: 12px;
+    }
   </style>
 </head>
+
 <body>
   <h1>Tablero Kanban</h1>
 
@@ -24,10 +38,12 @@
       <h2>Backlog</h2>
       <div class="tasks"></div>
     </div>
+
     <div class="column" id="doing">
       <h2>Doing</h2>
       <div class="tasks"></div>
     </div>
+
     <div class="column" id="done">
       <h2>Done</h2>
       <div class="tasks"></div>
@@ -46,13 +62,35 @@
     function render(tasks) {
       document.querySelectorAll(".tasks").forEach(t => t.innerHTML = "");
 
-      tasks.forEach(t => {
+      tasks.forEach(task => {
         const div = document.createElement("div");
         div.className = "task";
-        div.textContent = t.title;
+        div.innerHTML = `
+          <strong>${task.title}</strong><br>
+          <button onclick="moveTask(${task.id}, 'backlog')">Backlog</button>
+          <button onclick="moveTask(${task.id}, 'doing')">Doing</button>
+          <button onclick="moveTask(${task.id}, 'done')">Done</button>
+          <button onclick="deleteTask(${task.id})">🗑️</button>
+        `;
 
-        document.querySelector(`#${t.status} .tasks`).appendChild(div);
+        document.querySelector(`#${task.status} .tasks`).appendChild(div);
       });
+    }
+
+    async function moveTask(id, status) {
+      await fetch(`${API}/tasks/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      loadTasks();
+    }
+
+    async function deleteTask(id) {
+      await fetch(`${API}/tasks/${id}`, {
+        method: "DELETE"
+      });
+      loadTasks();
     }
 
     document.getElementById("task-form").addEventListener("submit", async (e) => {

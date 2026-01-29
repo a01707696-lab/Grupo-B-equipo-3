@@ -2,113 +2,138 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Gestor de Tareas - Kanban</title>
+  <title>Tablero Kanban</title>
+
   <style>
-    body { font-family: Arial; margin: 20px; }
-    .board { display: flex; gap: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    .board {
+      display: flex;
+      gap: 20px;
+    }
+
     .column {
       flex: 1;
       border: 1px solid #ccc;
-      padding: 10px;
       border-radius: 5px;
+      padding: 10px;
     }
+
     .task {
-      background: #eee;
-      margin: 5px 0;
-      padding: 5px;
-      border-radius: 3px;
+      background: #f2f2f2;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 4px;
     }
+
     button {
-      margin: 2px;
       font-size: 12px;
+      margin: 2px;
+    }
+
+    input {
+      margin-right: 5px;
     }
   </style>
 </head>
 
 <body>
-  <h1>Tablero Kanban</h1>
 
-  <form id="task-form">
-    <input type="text" id="task-title" placeholder="Título de la tarea" />
-    <button type="submit">Crear tarea</button>
-  </form>
+<h1>📋 Tablero Kanban</h1>
 
-  <div class="board">
-    <div class="column" id="backlog">
-      <h2>Backlog</h2>
-      <div class="tasks"></div>
-    </div>
+<form id="task-form">
+  <input type="text" id="task-title" placeholder="Título de la tarea" />
+  <input type="number" id="task-duration" placeholder="Duración (min)" />
+  <button type="submit">Crear tarea</button>
+</form>
 
-    <div class="column" id="doing">
-      <h2>Doing</h2>
-      <div class="tasks"></div>
-    </div>
+<br>
 
-    <div class="column" id="done">
-      <h2>Done</h2>
-      <div class="tasks"></div>
-    </div>
+<div class="board">
+  <div class="column" id="backlog">
+    <h2>Backlog</h2>
+    <div class="tasks"></div>
   </div>
 
-  <script>
-    const API = "http://127.0.0.1:8000";
+  <div class="column" id="doing">
+    <h2>Doing</h2>
+    <div class="tasks"></div>
+  </div>
 
-    async function loadTasks() {
-      const res = await fetch(`${API}/tasks`);
-      const tasks = await res.json();
-      render(tasks);
+  <div class="column" id="done">
+    <h2>Done</h2>
+    <div class="tasks"></div>
+  </div>
+</div>
+
+<script>
+  const API = "http://127.0.0.1:8000";
+
+  async function loadTasks() {
+    const res = await fetch(`${API}/tasks`);
+    const tasks = await res.json();
+    render(tasks);
+  }
+
+  function render(tasks) {
+    document.querySelectorAll(".tasks").forEach(col => col.innerHTML = "");
+
+    tasks.forEach(task => {
+      const div = document.createElement("div");
+      div.className = "task";
+      div.innerHTML = `
+        <strong>${task.title}</strong><br>
+        ⏱️ ${task.duration} min<br>
+        <button onclick="moveTask(${task.id}, 'backlog')">Backlog</button>
+        <button onclick="moveTask(${task.id}, 'doing')">Doing</button>
+        <button onclick="moveTask(${task.id}, 'done')">Done</button>
+        <button onclick="deleteTask(${task.id})">🗑️</button>
+      `;
+      document.querySelector(`#${task.status} .tasks`).appendChild(div);
+    });
+  }
+
+  async function moveTask(id, status) {
+    await fetch(`${API}/tasks/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+    loadTasks();
+  }
+
+  async function deleteTask(id) {
+    await fetch(`${API}/tasks/${id}`, { method: "DELETE" });
+    loadTasks();
+  }
+
+  document.getElementById("task-form").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const title = document.getElementById("task-title").value.trim();
+    const duration = parseInt(document.getElementById("task-duration").value) || 0;
+
+    if (!title) {
+      alert("El título no puede estar vacío");
+      return;
     }
 
-    function render(tasks) {
-      document.querySelectorAll(".tasks").forEach(t => t.innerHTML = "");
-
-      tasks.forEach(task => {
-        const div = document.createElement("div");
-        div.className = "task";
-        div.innerHTML = `
-          <strong>${task.title}</strong><br>
-          <button onclick="moveTask(${task.id}, 'backlog')">Backlog</button>
-          <button onclick="moveTask(${task.id}, 'doing')">Doing</button>
-          <button onclick="moveTask(${task.id}, 'done')">Done</button>
-          <button onclick="deleteTask(${task.id})">🗑️</button>
-        `;
-
-        document.querySelector(`#${task.status} .tasks`).appendChild(div);
-      });
-    }
-
-    async function moveTask(id, status) {
-      await fetch(`${API}/tasks/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
-      });
-      loadTasks();
-    }
-
-    async function deleteTask(id) {
-      await fetch(`${API}/tasks/${id}`, {
-        method: "DELETE"
-      });
-      loadTasks();
-    }
-
-    document.getElementById("task-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const title = document.getElementById("task-title").value.trim();
-      if (!title) return alert("El título no puede estar vacío");
-
-      await fetch(`${API}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title })
-      });
-
-      document.getElementById("task-title").value = "";
-      loadTasks();
+    await fetch(`${API}/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, duration })
     });
 
+    document.getElementById("task-title").value = "";
+    document.getElementById("task-duration").value = "";
     loadTasks();
-  </script>
+  });
+
+  loadTasks();
+</script>
+
 </body>
 </html>

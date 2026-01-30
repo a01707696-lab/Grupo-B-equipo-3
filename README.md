@@ -57,7 +57,7 @@ Características
 - Gestión de usuarios con asignación de tareas
 - Validaciones de negocio (máximo 4 tareas en Doing)
 - Estadísticas en tiempo real
-- Drag & Drop* entre columnas
+- Drag & Drop entre columnas
 - Persistencia en JSON (sin base de datos)
 
 Tecnologías

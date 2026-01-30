@@ -22,12 +22,47 @@
     h1 {
       color: #333;
       text-align: center;
+      margin-bottom: 20px;
     }
     
+    /* Instrucciones arriba de las estadísticas */
+    .instructions-bar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .instruction-item {
+      text-align: center;
+      padding: 0 10px;
+      border-right: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .instruction-item:last-child {
+      border-right: none;
+    }
+    
+    .instruction-icon {
+      font-size: 1.5em;
+      margin-bottom: 5px;
+      display: block;
+    }
+    
+    .instruction-text {
+      font-size: 0.9em;
+    }
+    
+    /* Estadísticas debajo de instrucciones */
     .stats-bar {
       display: flex;
       justify-content: space-around;
-      background: #667eea;
+      background: #2d3748;
       color: white;
       padding: 15px;
       border-radius: 8px;
@@ -67,6 +102,7 @@
       border-radius: 8px;
       padding: 15px;
       border: 1px solid #ddd;
+      min-height: 500px;
     }
     
     .column-header {
@@ -87,6 +123,18 @@
       margin-bottom: 10px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       border-left: 4px solid #667eea;
+      cursor: grab;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .task:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+    
+    .task.dragging {
+      opacity: 0.5;
+      transform: rotate(5deg);
     }
     
     .task-title {
@@ -113,22 +161,34 @@
     
     .task-actions {
       margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
     }
     
     button {
       padding: 8px 12px;
-      margin: 2px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-size: 0.9em;
+      transition: all 0.2s;
+    }
+    
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
     }
     
     .btn-primary { background: #007bff; color: white; }
     .btn-success { background: #28a745; color: white; }
-    .btn-warning { background: #ffc107; color: white; }
     .btn-danger { background: #dc3545; color: white; }
+    .btn-warning { background: #ffc107; color: white; }
     .btn-secondary { background: #6c757d; color: white; }
+    
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 0.8em;
+    }
     
     input, select {
       width: 100%;
@@ -147,9 +207,11 @@
     
     .success { background: #d4edda; color: #155724; }
     .error { background: #f8d7da; color: #721c24; }
+    .warning { background: #fff3cd; color: #856404; }
     
     .user-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       padding: 2px 8px;
       background: #667eea;
       color: white;
@@ -163,6 +225,136 @@
       padding: 2px;
       text-align: center;
     }
+    
+    .drop-zone {
+      min-height: 100px;
+      transition: background-color 0.2s;
+    }
+    
+    .drop-zone.drag-over {
+      background-color: rgba(102, 126, 234, 0.1);
+      border: 2px dashed #667eea;
+    }
+    
+    .column .tasks-container {
+      min-height: 400px;
+    }
+    
+    .empty-message {
+      color: #999;
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+    }
+    
+    .task-meta {
+      font-size: 0.8em;
+      color: #888;
+      margin-top: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .users-list-item {
+      background: white;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    
+    .users-list-item:hover {
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    
+    .user-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #667eea;
+    }
+    
+    .user-actions {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .user-name-edit {
+      width: 150px;
+      padding: 4px;
+      border: 1px solid #007bff;
+      border-radius: 4px;
+    }
+    
+    .assign-select {
+      width: 100%;
+      padding: 4px;
+      font-size: 0.85em;
+      margin-top: 5px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .sidebar-section {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .sidebar-section h3 {
+      margin-top: 0;
+      color: #667eea;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+    
+    .task-count-badge {
+      background: #e2e8f0;
+      color: #4a5568;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.8em;
+      margin-left: 5px;
+    }
   </style>
 </head>
 
@@ -170,6 +362,31 @@
   <div class="container">
     <h1>📋 Tablero Kanban</h1>
     
+    <!-- Barra de instrucciones -->
+    <div class="instructions-bar">
+      <div class="instruction-item">
+        <span class="instruction-icon">👆</span>
+        <div class="instruction-text"><strong>Arrastra</strong> tareas<br>entre columnas</div>
+      </div>
+      <div class="instruction-item">
+        <span class="instruction-icon">✏️</span>
+        <div class="instruction-text"><strong>Click en título</strong><br>para editar tarea</div>
+      </div>
+      <div class="instruction-item">
+        <span class="instruction-icon">👤</span>
+        <div class="instruction-text"><strong>Selecciona usuario</strong><br>para asignar tarea</div>
+      </div>
+      <div class="instruction-item">
+        <span class="instruction-icon">⏱️</span>
+        <div class="instruction-text"><strong>En "Done"</strong><br>ingresa tiempo real</div>
+      </div>
+      <div class="instruction-item">
+        <span class="instruction-icon">🚫</span>
+        <div class="instruction-text"><strong>Máximo 4 tareas</strong><br>en "Doing"</div>
+      </div>
+    </div>
+    
+    <!-- Barra de estadísticas -->
     <div class="stats-bar">
       <div class="stat-item">
         <div class="stat-value" id="total-tasks">0</div>
@@ -191,49 +408,63 @@
     
     <div class="main-content">
       <div class="sidebar">
-        <h3>👥 Usuarios</h3>
-        <input type="text" id="user-name" placeholder="Nombre del usuario">
-        <button onclick="addUser()" class="btn-primary">Agregar Usuario</button>
+        <div class="sidebar-section">
+          <h3>👥 Gestión de Usuarios</h3>
+          <input type="text" id="user-name" placeholder="Nombre del usuario">
+          <button id="add-user-btn" class="btn-primary">➕ Agregar Usuario</button>
+          
+          <div id="users-list" style="margin-top: 15px;"></div>
+        </div>
         
-        <div id="users-list" style="margin-top: 15px;"></div>
-        
-        <hr style="margin: 20px 0;">
-        
-        <h3>➕ Nueva Tarea</h3>
-        <input type="text" id="task-title" placeholder="Título de la tarea">
-        <input type="number" id="task-estimated" placeholder="Tiempo estimado (min)">
-        <select id="task-assign">
-          <option value="">Sin asignar</option>
-        </select>
-        <button onclick="createTask()" class="btn-success">Crear Tarea</button>
+        <div class="sidebar-section">
+          <h3>➕ Nueva Tarea</h3>
+          <input type="text" id="task-title" placeholder="Título de la tarea">
+          <input type="number" id="task-estimated" placeholder="Tiempo estimado (min)">
+          <select id="task-assign">
+            <option value="">Sin asignar</option>
+          </select>
+          <button id="create-task-btn" class="btn-success">✅ Crear Tarea</button>
+        </div>
         
         <div id="message" class="message" style="display: none;"></div>
       </div>
       
       <div class="board">
-        <div class="column" id="backlog">
+        <div class="column" id="backlog-col">
           <div class="column-header">
             <h2>📥 Backlog</h2>
             <div>Tareas pendientes</div>
           </div>
-          <div id="backlog-tasks"></div>
+          <div class="tasks-container drop-zone" id="backlog-tasks"></div>
         </div>
         
-        <div class="column" id="doing">
+        <div class="column" id="doing-col">
           <div class="column-header">
             <h2>⚡ Doing</h2>
             <div><span id="doing-tasks-count">0</span>/4 tareas • <span id="doing-total-time">0</span> min</div>
           </div>
-          <div id="doing-tasks"></div>
+          <div class="tasks-container drop-zone" id="doing-tasks"></div>
         </div>
         
-        <div class="column" id="done">
+        <div class="column" id="done-col">
           <div class="column-header">
             <h2>✅ Done</h2>
             <div><span id="done-tasks-count">0</span> tareas • <span id="done-total-time">0</span> min</div>
           </div>
-          <div id="done-tasks"></div>
+          <div class="tasks-container drop-zone" id="done-tasks"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para confirmar eliminación de usuario -->
+  <div id="delete-user-modal" class="modal">
+    <div class="modal-content">
+      <h3>⚠️ Confirmar Eliminación</h3>
+      <p id="delete-user-message">¿Estás seguro de eliminar este usuario?</p>
+      <div class="modal-buttons">
+        <button id="cancel-delete-btn" class="btn-secondary">Cancelar</button>
+        <button id="confirm-delete-btn" class="btn-danger">Eliminar</button>
       </div>
     </div>
   </div>
@@ -243,24 +474,88 @@
     let users = [];
     let tasks = [];
     let editingTaskId = null;
+    let editingUserId = null;
+    let draggedTask = null;
+    let userToDelete = null;
 
-    // Cargar datos iniciales
+    // ========== INICIALIZACIÓN ==========
+    document.addEventListener('DOMContentLoaded', function() {
+      // Asignar eventos a los botones principales
+      document.getElementById('add-user-btn').addEventListener('click', addUser);
+      document.getElementById('create-task-btn').addEventListener('click', createTask);
+      
+      // Eventos del modal
+      document.getElementById('cancel-delete-btn').addEventListener('click', closeDeleteModal);
+      document.getElementById('confirm-delete-btn').addEventListener('click', confirmDeleteUser);
+      
+      // Cerrar modal al hacer clic fuera
+      document.getElementById('delete-user-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+      });
+      
+      // Configurar drag & drop
+      setupDragAndDrop();
+      
+      // Cargar datos iniciales
+      loadAllData();
+    });
+
+    function setupDragAndDrop() {
+      const dropZones = document.querySelectorAll('.drop-zone');
+      
+      dropZones.forEach(zone => {
+        zone.addEventListener('dragover', function(event) {
+          event.preventDefault();
+          this.classList.add('drag-over');
+        });
+        
+        zone.addEventListener('dragleave', function(event) {
+          this.classList.remove('drag-over');
+        });
+        
+        zone.addEventListener('drop', async function(event) {
+          event.preventDefault();
+          this.classList.remove('drag-over');
+          
+          if (!draggedTask) return;
+          
+          // Determinar en qué columna se soltó
+          const columnId = this.parentElement.id;
+          let newStatus = '';
+          
+          if (columnId === 'backlog-col') newStatus = 'backlog';
+          else if (columnId === 'doing-col') newStatus = 'doing';
+          else if (columnId === 'done-col') newStatus = 'done';
+          
+          if (newStatus) {
+            await moveTask(draggedTask, newStatus);
+          }
+          
+          draggedTask = null;
+        });
+      });
+    }
+
+    // ========== FUNCIONES PRINCIPALES ==========
     async function loadAllData() {
       await loadUsers();
       await loadTasks();
       await loadStats();
     }
 
-    // ========== USUARIOS ==========
+    // ========== USUARIOS - CRUD COMPLETO ==========
     async function loadUsers() {
       try {
         const res = await fetch(`${API}/users`);
         if (res.ok) {
           users = await res.json();
           updateUsersList();
-          updateAssignSelect();
+          updateAssignSelect(); // ¡IMPORTANTE! Actualiza el select
+        } else {
+          console.error("Error en respuesta del servidor:", await res.text());
         }
       } catch (error) {
+        console.error("Error cargando usuarios:", error);
         showMessage("Error cargando usuarios", "error");
       }
     }
@@ -283,34 +578,179 @@
 
         if (res.ok) {
           nameInput.value = '';
+          // Recargar usuarios para actualizar el select
           await loadUsers();
-          showMessage("Usuario agregado", "success");
+          showMessage("✅ Usuario agregado correctamente", "success");
         } else {
           const error = await res.json();
           showMessage(error.error || "Error al agregar usuario", "error");
+        }
+      } catch (error) {
+        console.error("Error agregando usuario:", error);
+        showMessage("Error de conexión con el servidor", "error");
+      }
+    }
+
+    async function updateUser(userId, newName) {
+      try {
+        const res = await fetch(`${API}/users/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName })
+        });
+
+        if (res.ok) {
+          await loadUsers();
+          showMessage("✅ Usuario actualizado", "success");
+        } else {
+          const error = await res.json();
+          showMessage(error.error || "Error al actualizar usuario", "error");
         }
       } catch (error) {
         showMessage("Error de conexión", "error");
       }
     }
 
+    async function deleteUser(userId) {
+      try {
+        const res = await fetch(`${API}/users/${userId}`, {
+          method: 'DELETE'
+        });
+
+        if (res.ok) {
+          // También desasignar este usuario de todas las tareas
+          await unassignUserFromAllTasks(userId);
+          await loadUsers();
+          await loadTasks();
+          showMessage("✅ Usuario eliminado", "success");
+        } else {
+          const error = await res.json();
+          showMessage(error.error || "Error al eliminar usuario", "error");
+        }
+      } catch (error) {
+        showMessage("Error de conexión", "error");
+      }
+    }
+
+    async function unassignUserFromAllTasks(userId) {
+      // Desasignar usuario de todas sus tareas
+      const userTasks = tasks.filter(t => t.assigned_to == userId);
+      for (const task of userTasks) {
+        await updateTask(task.id, 'assigned_to', null);
+      }
+    }
+
     function updateUsersList() {
       const container = document.getElementById('users-list');
       if (users.length === 0) {
-        container.innerHTML = '<p style="color: #666;">No hay usuarios aún</p>';
+        container.innerHTML = '<p style="color: #666; text-align: center;">No hay usuarios aún</p>';
       } else {
-        container.innerHTML = users.map(user => `
-          <div style="background: white; padding: 8px; margin-bottom: 5px; border-radius: 4px;">
-            👤 <strong>${user.name}</strong>
-          </div>
-        `).join('');
+        container.innerHTML = users.map(user => {
+          const isEditing = editingUserId === user.id;
+          // Contar tareas asignadas a este usuario CORRECTAMENTE
+          const taskCount = tasks.filter(t => t.assigned_to == user.id).length;
+          
+          return `
+            <div class="users-list-item">
+              <div class="user-info">
+                <div class="user-color"></div>
+                ${isEditing ? 
+                  `<input type="text" class="user-name-edit" value="${user.name}" 
+                    onblur="saveUserName(${user.id}, this.value)"
+                    onkeypress="if(event.key === 'Enter') this.blur()">` :
+                  `<span style="font-weight: bold;">${user.name}</span>`
+                }
+                <span class="task-count-badge">${taskCount} tarea${taskCount !== 1 ? 's' : ''}</span>
+              </div>
+              <div class="user-actions">
+                ${isEditing ? 
+                  `<button class="btn-sm btn-secondary" onclick="cancelEditUser(${user.id})">✖</button>` :
+                  `<button class="btn-sm btn-warning" onclick="startEditUser(${user.id})">✏️</button>`
+                }
+                <button class="btn-sm btn-danger" onclick="showDeleteUserModal(${user.id}, '${user.name}')">🗑️</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        // Enfocar input si está en modo edición
+        if (editingUserId !== null) {
+          const input = container.querySelector('.user-name-edit');
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        }
+      }
+    }
+
+    function startEditUser(userId) {
+      editingUserId = userId;
+      updateUsersList();
+    }
+
+    function cancelEditUser() {
+      editingUserId = null;
+      updateUsersList();
+    }
+
+    async function saveUserName(userId, newName) {
+      const trimmedName = newName.trim();
+      if (!trimmedName) {
+        showMessage("El nombre no puede estar vacío", "error");
+        editingUserId = null;
+        updateUsersList();
+        return;
+      }
+      
+      await updateUser(userId, trimmedName);
+      editingUserId = null;
+    }
+
+    function showDeleteUserModal(userId, userName) {
+      userToDelete = userId;
+      const taskCount = tasks.filter(t => t.assigned_to == userId).length;
+      const message = `¿Estás seguro de eliminar al usuario <strong>"${userName}"</strong>?<br><br>
+                      <small style="color: #666;">
+                        ${taskCount > 0 ? 
+                          `⚠️ Tiene ${taskCount} tarea${taskCount !== 1 ? 's' : ''} asignada${taskCount !== 1 ? 's' : ''}. Quedarán sin asignar.` : 
+                          'No tiene tareas asignadas.'
+                        }
+                      </small>`;
+      document.getElementById('delete-user-message').innerHTML = message;
+      document.getElementById('delete-user-modal').style.display = 'block';
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-user-modal').style.display = 'none';
+      userToDelete = null;
+    }
+
+    async function confirmDeleteUser() {
+      if (userToDelete) {
+        await deleteUser(userToDelete);
+        closeDeleteModal();
       }
     }
 
     function updateAssignSelect() {
       const select = document.getElementById('task-assign');
+      if (!select) {
+        console.error("No se encontró el select con id 'task-assign'");
+        return;
+      }
+      
+      // Guardar selección actual
+      const currentSelection = select.value;
+      
+      // Actualizar opciones
       select.innerHTML = '<option value="">Sin asignar</option>' +
         users.map(user => `<option value="${user.id}">${user.name}</option>`).join('');
+      
+      // Restaurar selección si aún existe
+      if (currentSelection && users.some(u => u.id == currentSelection)) {
+        select.value = currentSelection;
+      }
     }
 
     function getUserById(id) {
@@ -324,6 +764,8 @@
         if (res.ok) {
           tasks = await res.json();
           renderTasks();
+          // Actualizar lista de usuarios para mostrar conteo correcto
+          updateUsersList();
         }
       } catch (error) {
         console.error("Error cargando tareas:", error);
@@ -355,17 +797,32 @@
     }
 
     function renderTasks() {
-      renderColumn('backlog', tasks.filter(t => t.status === 'backlog'));
-      renderColumn('doing', tasks.filter(t => t.status === 'doing'));
-      renderColumn('done', tasks.filter(t => t.status === 'done'));
+      renderColumn('backlog-tasks', tasks.filter(t => t.status === 'backlog'));
+      renderColumn('doing-tasks', tasks.filter(t => t.status === 'doing'));
+      renderColumn('done-tasks', tasks.filter(t => t.status === 'done'));
     }
 
-    function renderColumn(columnId, columnTasks) {
-      const container = document.getElementById(`${columnId}-tasks`);
+    function renderColumn(containerId, columnTasks) {
+      const container = document.getElementById(containerId);
       if (columnTasks.length === 0) {
-        container.innerHTML = '<p style="color: #999; text-align: center;">No hay tareas</p>';
+        container.innerHTML = '<div class="empty-message">No hay tareas</div>';
       } else {
         container.innerHTML = columnTasks.map(task => createTaskHTML(task)).join('');
+        
+        // Agregar eventos drag a las nuevas tareas
+        columnTasks.forEach(task => {
+          const taskElement = document.getElementById(`task-${task.id}`);
+          if (taskElement) {
+            taskElement.addEventListener('dragstart', function(event) {
+              draggedTask = task.id;
+              this.classList.add('dragging');
+            });
+            
+            taskElement.addEventListener('dragend', function() {
+              this.classList.remove('dragging');
+            });
+          }
+        });
       }
     }
 
@@ -374,10 +831,11 @@
       const isEditing = editingTaskId === task.id;
       
       return `
-        <div class="task" id="task-${task.id}">
+        <div class="task" id="task-${task.id}" draggable="true">
           ${isEditing ? 
             `<input type="text" class="task-title-edit" value="${task.title}" 
-              onblur="updateTaskTitle(${task.id}, this.value)">` :
+              onblur="updateTaskTitle(${task.id}, this.value)"
+              onkeypress="if(event.key === 'Enter') this.blur()">` :
             `<div class="task-title" onclick="startEditTitle(${task.id})">
               ${task.title}
             </div>`
@@ -388,7 +846,17 @@
             ${task.real_time ? `| Real: ${task.real_time} min` : ''}
           </div>
           
-          ${user ? `<div class="user-badge">👤 ${user.name}</div>` : ''}
+          <div style="margin: 5px 0;">
+            <small>Asignado a:</small>
+            <select class="assign-select" onchange="updateTaskAssignment(${task.id}, this.value)">
+              <option value="">Sin asignar</option>
+              ${users.map(u => `
+                <option value="${u.id}" ${task.assigned_to == u.id ? 'selected' : ''}>
+                  ${u.name}
+                </option>
+              `).join('')}
+            </select>
+          </div>
           
           ${task.status === 'done' ? `
             <div style="margin-top: 5px;">
@@ -399,17 +867,24 @@
           ` : ''}
           
           <div class="task-actions">
-            <button class="btn-secondary" onclick="moveTask(${task.id}, 'backlog')">Backlog</button>
-            <button class="btn-primary" onclick="moveTask(${task.id}, 'doing')">Doing</button>
-            <button class="btn-success" onclick="moveTask(${task.id}, 'done')">Done</button>
-            <button class="btn-danger" onclick="deleteTask(${task.id})">Eliminar</button>
+            <button class="btn-danger btn-sm" onclick="deleteTask(${task.id})">
+              🗑️ Eliminar
+            </button>
           </div>
           
-          <div style="font-size: 0.8em; color: #888; margin-top: 5px;">
-            ${task.created_at || ''}
+          <div class="task-meta">
+            <span>📅 ${task.created_at || ''}</span>
+            <span>${task.updated_at !== task.created_at ? '✏️ Editada' : ''}</span>
           </div>
         </div>
       `;
+    }
+
+    async function updateTaskAssignment(taskId, userId) {
+      const assignedTo = userId === "" ? null : parseInt(userId);
+      await updateTask(taskId, 'assigned_to', assignedTo);
+      // Actualizar lista de usuarios para mostrar nuevo conteo
+      updateUsersList();
     }
 
     async function createTask() {
@@ -442,7 +917,7 @@
           // Recargar datos
           await loadTasks();
           await loadStats();
-          showMessage("Tarea creada correctamente", "success");
+          showMessage("✅ Tarea creada correctamente", "success");
         } else {
           const error = await res.json();
           showMessage(error.error || "Error al crear tarea", "error");
@@ -466,9 +941,11 @@
         } else {
           const error = await res.json();
           showMessage(error.error || "No se puede mover la tarea", "error");
+          await loadTasks(); // Recargar para mantener consistencia
         }
       } catch (error) {
         showMessage("Error de conexión", "error");
+        await loadTasks();
       }
     }
 
@@ -483,6 +960,10 @@
         if (res.ok) {
           await loadTasks();
           await loadStats();
+          // Si cambió la asignación, actualizar lista de usuarios
+          if (field === 'assigned_to') {
+            updateUsersList();
+          }
         }
       } catch (error) {
         console.error("Error actualizando tarea:", error);
@@ -508,7 +989,12 @@
     }
 
     async function deleteTask(id) {
-      if (!confirm('¿Estás seguro de eliminar esta tarea?')) return;
+      const task = tasks.find(t => t.id === id);
+      const taskTitle = task ? `"${task.title}"` : "esta tarea";
+      
+      if (!confirm(`¿Estás seguro de eliminar ${taskTitle}?\nEsta acción no se puede deshacer.`)) {
+        return;
+      }
 
       try {
         const res = await fetch(`${API}/tasks/${id}`, {
@@ -518,7 +1004,7 @@
         if (res.ok) {
           await loadTasks();
           await loadStats();
-          showMessage("Tarea eliminada", "success");
+          showMessage("✅ Tarea eliminada correctamente", "success");
         }
       } catch (error) {
         showMessage("Error al eliminar tarea", "error");
@@ -535,9 +1021,6 @@
         messageDiv.style.display = 'none';
       }, 3000);
     }
-
-    // Inicializar
-    loadAllData();
   </script>
 </body>
 </html>

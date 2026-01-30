@@ -1,18 +1,16 @@
-Desarrollo de un Gestor de Tareas con metodología Scrum
-
-Integrantes:
+## Desarrollo de un Gestor de Tareas con metodología Scrum
+## Integrantes:
 Mónica Berenice Paulín López | A01707696  
 Sofía Cabáñez de la Peña | A01707231 
 Natalia Esteves Ríos | A01705453 
 Claudia Rebeca Guatemala Gómez |A01705453
 Irán Carmona Díaz |A01709666
-
 ## Descripción
 Aplicación web para gestión de tareas implementando metodología Scrum con tablero Kanban.
 
 ## Instalación y Ejecución
+
 1. Clonar repositorio
-```bash
 git clone [URL_DEL_REPOSITORIO]
 cd [NOMBRE_CARPETA]
 
@@ -27,7 +25,7 @@ Servidor backend: http://localhost:5000
 Interfaz web: Abrir index.html en navegador
 API Endpoints: Ver sección siguiente
 
-**## API Endpoints**
+## API Endpoints
 Método	Endpoint	Descripción
 GET	/	Estado del servidor
 GET	/tasks	Obtener todas las tareas
